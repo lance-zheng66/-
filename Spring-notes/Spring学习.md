@@ -1,4 +1,4 @@
-##  Spring学习
+##  Spring学习 第一章
 
 #### 一、Spring的两大核心特性
 
@@ -158,3 +158,47 @@ JDBC 不是产生样板式代码的唯一场景。在许多编程场景中往往
 9．此时，bean 已经准备就绪，可以被应用程序使用了，它们将一直驻留在应用上 下文中，直到该应用上下文被销毁；
 
  10．如果 bean 实现了DisposableBean接口，Spring 将调用它的destroy()接口 方法。同样，如果 bean 使用destroy-method声明了销毁方法，该方法也会被调用。 
+
+#### 七、Spring生态介绍
+
+ 
+
+* Spring 框架的发布版本包括了 20 个不 同的模块，每个模块会有 3个JAR 文件（二进 制类库、源码的 JAR 文件以及 JavaDoc 的JAR 文件）
+
+* 这些模块依据其所属的功能可以划分为 6 类不同的功能；
+
+* **六大模块：**
+
+  **① 核心容器:**
+
+  容器是 Spring 框架最核心的部分，它管理着 Spring 应用中 bean 的创建、配置和管 理。在该模块中，包括了 Spring bean 工厂，它为 Spring 提供了 DI 的功能。基于 bean 工厂，我们还会发现有多种 Spring 应用上下文的实现，每一种都提供了配置 Spring 的 不同方式。 除了 bean 工厂和应用上下文，该模块也提供了许多企业服务，例如 E-mail、JNDI 访问、EJB 集成和调度。 所有的 Spring 模块都构建于核心容器之上。当你配置应用时，其实你隐式地使用了 这些类。
+
+  ② **AOP 模块** 
+
+  在 AOP 模块中，Spring 对面向切面编程提供了丰富的支持。这个模块是 Spring 应 用系统中开发切面的基础。与 DI 一样，AOP 可以帮助应用对象解耦。借助于 AOP，可 以将遍布系统的关注点（例如事务和安全）从它们所应用的对象中解耦出来。 
+
+  ③**数据访问与集成** 
+
+  使用 JDBC 编写代码通常会导致大量的样板式代码，例如获得数据库连接、创建语 句、处理结果集到最后关闭数据库连接。Spring 的 JDBC 和 DAO（Data Access Object） 模块抽象了这些样板式代码，使我们的数据库代码变得简单明了，还可以避免因为关闭 数据库资源失败而引发的问题。该模块在多种数据库服务的错误信息之上构建了一个语 义丰富的异常层，以后我们再也不需要解释那些隐晦专有的 SQL 错误信息了！ 对于那些更喜欢 ORM（Object-Relational Mapping）工具而不愿意直接使用 JDBC 的 开发者，Spring 提供了 ORM 模块。Spring 的ORM 模块建立在对 DAO 的支持之上，并为 多个 ORM 框架提供了一种构建 DAO 的简便方式。Spring 没有尝试去创建自己的 ORM 解决方案，而是对许多流行的 ORM 框架进行了集成，包括 Hibernate、Java Persisternce API、 Java Data Object 和iBATIS SQL Maps。Spring 的事务管理支持所有的 ORM 框架以及 JDBC。
+
+  本模块同样包含了在 JMS（Java Message Service）之上构建的 Spring 抽象层，它会 使用消息以异步的方式与其他应用集成。从 Spring 3.0 开始，本模块还包含对象到 XML 映射的特性，它最初是 Spring Web Service 项目的一部分。
+
+  本模块会使用 Spring AOP 模块为 Spring 应用中的对象提供事务管理服务。
+
+  
+
+  **④ Web 与远程调用** 
+
+  MVC（Model-View-Controller）模式是一种普遍被接受的构建 Web 应用的方法，它 可以帮助用户将界面逻辑与应用逻辑分离。Java从来不缺少MVC框架，Apache的Struts、 JSF、WebWork 和 Tapestry 都是可选的最流行的 MVC 框架。 虽然 Spring 能够与多种流行的 MVC 框架进行集成，但它的 Web 和远程调用模块自 带了一个强大的 MVC 框架，有助于在 Web 层提升应用的松耦合水平。 Spring 的 MVC 框架。 除了面向用户的 Web 应用，该模块还提供了多种构建与其他应用交互的远程调用方 案。Spring 远程调用功能集成了 RMI（Remote Method Invocation）、 Hessian、Burlap、 JAX-WS，同时 Spring 还自带了一个远程调用框架：HTTP invoker。Spring 还提供了暴 露和使用 REST API 的良好支持。
+
+​        **⑤ Instrumentation** 
+
+​		Spring 的 Instrumentation 模块提供了为 JVM 添加代理（agent）的功能。具体来讲， 它为 Tomcat 提供      		了一个织入代理，能够为 Tomcat 传递类文件，就像这些文件是被类加 载器加载的一样。
+
+​		**⑥ 测试**
+
+​		鉴于开发者自测的重要性，Spring 提供了测试模块以致力于 Spring 应用的测试。 通过该模块，发现Spring 		为使用 JNDI、Servlet 和 Portlet 编写单元测试提供了 一系列的 mock 对象实现。对于集成测试，该模块为加		载 Spring 应用上下文中的 bean 集合以及与 Spring 上下文中的 bean 进行交互提供了支持。 
+
+​		
+
+​		 
