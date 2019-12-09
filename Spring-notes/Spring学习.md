@@ -47,13 +47,114 @@
 
   更通俗点就是
 
-  **A需要完成某个动作，需要借助在A的内部创建B的实例化对象 ，但是这样做耦合度太高，所以通过配置xml文件(里面有A与B的依赖关系)告诉一个负责协调各个对象的第三方组件（容器），容器自动注入B的实例化对象**
+  **A需要完成某个动作，需要借助在A的内部创建B的实例化对象 ，但是这样做耦合度太高，所以通过配置xml文件(里面有A与B的依赖关系)告诉一个负责协调各个对象的第三方组件（容器），容器自动注入B的实例化对象，（应用了多态）**
 
 * 装配:创建应用组件之间协作的行为通常称为装配（wiring）。 Spring 有多种装配 bean 的 方式，采用 XML 是很常见的一种装配方式。
 
 * 只 有 Spring 通过它（xml）的配置，能够了解这些组成部分是如何装配起来的。这样的话，就可以 在不改变所依赖的类的情况下，修改依赖关系。 
 
-  
 
+#### 五、面向切面编程 AOP
 
+* 面向切程编程（aspect-oriented programming,AOP)  允许你把遍布应用各处的功能分离出来形成可重用的组件。
 
+* 面向切面编程往往被定义成促使软件系统实现关注点分离的一项技术。系统由许多不同的组件组成，每一个组件负责一块特定功能。除了实现自身核心的功能之外，这些组件还经常承担着额外的职责。诸如日志，事务管理管理和安全这样的系统服务经常融入到其他自身具有核心功能的组件当中去，这些**系统服务通常被称为横切关注点，因为他们跨越系统的多个组件。**
+
+* 如果将这些关注点分散到多个组件中去，代码就会带来双重复杂性：
+
+  * 实现系统关注点功能的代码将会重复出现在多个组件中。这意味着如果你要改变这些关注点的逻辑，必须修改各个模块中的相关实现。即使你把这些关注点抽象为一个独立的模块，其他模块只是调用它的方法，但方法的调用还是会重 复出现在各个模块中。 
+  * 组件会因为那些与自身核心业务无关的代码而变得混乱。一个向地址簿增加地 址条目的方法应该只关注如何添加地址，而不应该关注它是不是安全的或者是 否需要支持事务。 
+
+  注: 一个组件应该关注的是自己的核心功能，不需要与关注点产生过多的交集。
+
+* **AOP是如何处理改变关注点分散到多个组件的问题？**
+
+  AOP能够将这些服务模块化，并以声明的方法式将它们应用到它们需要影响影响的组件中去。所造成的结果就是这些组件会具有更高的内聚性并且会更加关注自身的业务，完全不需要了解系统服务所带来得复杂性。总之AOP能够确保POJO的简单性
+
+  我们可以**把切面想象为覆盖在组件之上的一个外壳**，应用是由那么实现各自业务功能的模块组成的。借助AOP，可以使用各种功能层去包裹核心业务。这些层以声明的方式灵活的应用到系统中，你的核心应用甚至不知道他们的存在。**这是一个非常强大的理念，可以将安全、事务、日志关注点与核心业务逻辑相分离**
+
+**前提：**
+
+这样这些系统服务声明为一个Bean
+
+方式：
+
+通过Spring配置文件把相关bean声明为一个切面，并定义切点,以及声明前置通知（切点前调用切面的方法）和后置通知（切点后调用切面的方法）。
+
+注：为SpringBean注入依赖也可以应用到Spring切面中
+
+#### 六、使用模板消除样板式代码
+
+样板式的代码（boilerplate code）。通常为了实现通用的和简单的任 务，你不得不一遍遍地重复编写这样的代码。 遗憾的是，它们中的很多是因为使用 Java API 而导致的样板式代码。样板式代码的 一个常见范例是使用 JDBC 访问数据库查询数据。
+
+JDBC 不是产生样板式代码的唯一场景。在许多编程场景中往往都会导致类似的样 板式代码，JMS、JNDI 和使用 REST 服务通常也涉及大量的重复代码。 Spring 旨在通过模板封装来消除样板式代码。Spring 的 JdbcTemplate 使得执行数据 库操作时，避免传统的 JDBC 样板代码成为了可能
+
+#### 七、容器
+
+* 在基于 Spring 的应用中，你的应用对象生存于 Spring 容器（container）中。Spring 容器负责创建对象，装配它们，配置它们并管理它们的整个生命周期，从生存到死亡在这里。
+
+注： 在Spring应用中，对象由Spring 容器创建和装配，并存在容器之中 
+
+*  容器是 Spring 框架的核心。Spring 容器使用 DI 管理构成应用的组件，它会创建 相互协作的组件之间的关联。
+
+* Spring 容器并不是只有一个。Spring 自带 了多个容器实现，
+
+  Spring可以归为两种不同的类型:
+
+  ①、**bean 工厂**（由 org.springframework. beans.factory.BeanFactory 接口定义）是最简单的容器，提供基本的 DI 支持。
+
+  ②、**应用上下文**（由org.springframework.context.ApplicationContext接口定义） 基于 BeanFactory构建，并提供应用框架级别的服务，例如从属性文件解析文本信息以及发布 应用事件给感兴趣的事件监听者。
+
+* **应用上下文：**
+
+  Spring 自带了多种类型的应用上下文。以下几个是比较常见的：
+
+  **①**
+
+  *  AnnotationConfigWebApplicationContext：从一个或多个基于 Java 的配置类中加载 Spring Web 应用上下文。
+  * XmlWebApplicationContext：从 Web 应用下的一个或多个 XML 配置文件 中加载上下文定义 
+
+  **注：以上两个应用上下文是基于web的spring应用**
+
+  **②**
+
+  * ClassPathXmlApplicationContext：从类路径下的一个或多个 XML 配 置文件中加载上下文定义，把应用上下文的定义文件作为类资源
+  * FileSystemXmlApplicationContext：从文件系统下的一个或多个 XML 配置文件中加载上下文定义。
+
+  注： **FileSystemXmlApplicationContext**在**指定的** 文件系统路径下查找 knight.xml 文件
+
+  **ClassPathXmlApplicationContext** 是 在**所有的**类路径（包含 JAR 文件）下查找 knight.xml 文件。 
+
+  **③**
+
+  * AnnotationConfigApplicationContext：从一个或多个基于 Java 的配 置类中加载 Spring 应用上下文。
+
+  注：在这里没有指定加载 Spring 应用上下文所需的 XML 文件，AnnotationConfig- ApplicationContext通过一个配置类加载 bean
+
+  应用上下文准备就绪之后，我们就可以调用上下文的**getBean()**方法从 Spring 容 器中获取 bean。
+
+*  **bean的生命周期**：
+
+  图示：![bean的整个流程图](C:\Users\lance\Desktop\bean的整个流程图.PNG)
+
+详细描述：
+
+1．Spring 对 bean 进行实例化；
+
+ 2．Spring 将值和 bean 的引用注入到 bean 对应的属性中；
+
+ 3．如果 bean 实现了BeanNameAware接口，Spring 将bean 的ID 传递给setBean- Name()方法； 
+
+4．如果 bean实现了BeanFactoryAware接口，Spring将调用setBeanFactory() 方法，将 BeanFactory 容器实例传入； 
+
+5．如果 bean 实现了 ApplicationContextAware 接口，Spring 将调用 setApplicationContext()方法，将 bean 所在的应用上下文的引用传入进来； 
+
+6．如果 bean 实现了 BeanPostProcessor 接口，Spring 将调用它们的 post- ProcessBeforeInitialization()方法； 
+
+7．如果 bean 实现了 InitializingBean 接口，Spring 将调用它们的 after- PropertiesSet()方法。类似地，如果 bean 使用init-method声明了初始化方法， 该方法也会被调用；
+
+8．如果 bean 实现了 BeanPostProcessor 接口，Spring 将调用它们的 post- ProcessAfterInitialization()方法； 
+
+9．此时，bean 已经准备就绪，可以被应用程序使用了，它们将一直驻留在应用上 下文中，直到该应用上下文被销毁；
+
+ 10．如果 bean 实现了DisposableBean接口，Spring 将调用它的destroy()接口 方法。同样，如果 bean 使用destroy-method声明了销毁方法，该方法也会被调用。 
