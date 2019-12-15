@@ -30,7 +30,7 @@ Spring 容器负责创建应用程序中的bean并通过DI来协调这些对象�
 
 自动配置 > JavaConfig > XML
 
-**①自动化装配**：
+### **①自动化装配**：
 
 在便利性方面,最强大的还是Spring的自动化配置
 
@@ -159,4 +159,75 @@ this.cd = cd`};`
 @Autowired是Spring特有的注解，如果不愿意在代码到处使用Spring的特定注解来完成自动装配任务的话，可以考虑将其替换为@Inject;
 
 @Inject来源于Java依赖注入规范,该规范同时还为我们定义了@Named注解。在自动装配中，Spring同时支持@Injecth和@Autowired.尽管@Inject和@Autowired之间有一些细微的差别。但是大多数场景是可以互换的
+
+
+
+*******
+
+### ② 通过java 代码装配bean
+
+**前言：**
+
+尽管在很多场景下通过组件扫描和自动装配实现 Spring 的自动化配置是更为推荐 的方式，但有时候自动化配置的方案行不通，因此需要明确配置 Spring。比如说，你想 要将第三方库中的组件装配到你的应用中，在这种情况下，是没有办法在它的类上添加 @Component和@Autowired注解的，因此就不能使用自动化装配的方案了。 
+
+在进行显式配置的时候，有两种可 选方案：Java 和 XML
+
+在进行显式配置时，JavaConfig 是更好的方案，因为它更为强 大、类型安全并且对重构友好。因为它就是 Java 代码，就像应用程序中的其他 Java 代 码一样
+
+JavaConfig 与其他的 Java 代码又有所区别，在概念上，它与应用程序中的业 务逻辑和领域代码是不同的。尽管它与其他的组件一样都使用相同的语言进行表述，但 JavaConfig 是配置代码。这意味着它不应该包含任何业务逻辑，JavaConfig 也不应该侵 入到业务逻辑代码之中。尽管不是必须的，但通常会将 JavaConfig 放到单独的包中，使 它与其他的应用程序逻辑分离开来，这样对于它的意图就不会产生困惑了。
+
+**创建配置类：**
+
+创建 **JavaConfig** 类的关键在于为其添加@Configuration 注解，**@Configuration** 注解表明这个类是一个配置类，该类应该包含在Spring应用上下文中如何创建bean的细节。
+
+**声明简单的bean：**
+
+要在 JavaConfig 中声明 bean，我们需要编写一个方法，这个方法会创建所需类型的实 例，然后给这个方法添加@Bean注解。
+
+@Bean 注解会告诉 Spring 这个方法将会返回一个对象，该对象要注册为 Spring 应 用上下文中的 bean。方法体中包含了最终产生 bean 实例的逻辑。 默认情况下，bean 的 ID 与带有@Bean注解的方法名是一样的
+
+**借助JavaCongig实现注入：**
+
+在 JavaConfig 中装配 bean 的最简单方式就是引用创建 bean 的方法。
+
+再次强调一遍，带有@Bean 注解的方法可以采用任何必要的 Java 功能来产生 bean 实例。**构造器和 Setter 方法只是@Bean方法的两个简单样例。这里所存在的可能性仅仅 受到 Java 语言的限制。** 
+
+******
+
+### ③ 通过XML 装配bean
+
+**创建xml 配置规范**:
+
+在使用 XML 为 Spring 装配 bean 之前，你需要创建一个新的配置规范。
+
+在使用 JavaConfig 的时候，这意味着要创建一个带有@Configuration注解的类，而在 XML 配置中，这意味着要创建一个 XML 文件，并且要以<beans>元素为根。
+
+但在使用 XML 时，需要在 配置文件的顶部声明多个 XML 模式（ XSD）文件，这些文件定义了配置Spring的XML 元素。
+借助 Spring Tool Suite 创建 XML 配置文件创建和管理 Spring XML 配置文件的一 种简便方式是使用 Spring Tool Suite（https://spring.io/tools/sts）。
+
+在 Spring Tool Suite 的菜单中，选择 File>New>Spring Bean Configuration File，能够创建 Spring XML 配 置文件，并且可以选择可用的配置命名空间。 
+
+用来装配 bean 的最基本的 XML 元素包含在spring-beans模式之中，在上面这 个 XML 文件中，它被定义为根命名空间。<beans>是该模式中的一个元素，它是所有 Spring 配置文件的根元素.
+
+**声明简单的bean：**
+
+要在基于 XML 的 Spring 配置中声明一个 bean，我们要使用spring-beans模式 中的另外一个元素：<bean>。<bean>元素类似于 JavaConfig 中的@Bean 注解
+
+声明了一个很简单的 bean，创建这个 bean 的类通过 class 属性来指定的，并且 要使用全限定的类名。因为没有明确给定 ID，所以这个 bean 将会根据全限定类名来进行命名。
+
+简单 bean 声明的一些特征：
+
+第一件需要注意的事情就是你不再需要直接负责创建实例，
+
+另外一个需要注意到的事情就是，在这个简单的<bean>声明中，我们将 bean 的类 型以字符串的形式设置在了class属性中。谁能保证设置给class属性的值是真正的 类呢？Spring 的 XML 配置并不能从编译期的类型检查中受益。即便它所引用的是实际 的类型，如果你重命名了类，会发生什么呢？ 借助IDE检查XML的合法性使用能够感知Spring功能的IDE，如 Spring Tool Suite， 能够在很大程度上帮助你确保 Spring XML 配置的合法性。 
+
+**借助构造器注入初始化Bean:**
+
+在 Spring XML 配置中，只有一种声明 bean 的方式：使用<bean>元素并指定class 属性。Spring 会从这里获取必要的信息来创建 bean。 
+
+在XML声明DI时，具体到构造器注入有两种基本的配置方案：
+
+* <constructor-arg>元素 
+
+* 使用 Spring 3.0 所引入的 c-命名空间 
 
