@@ -186,16 +186,104 @@ in.close;
 * 创建Dao接口实现类使用了代理模式：
 
   优势 : 不修改源码的基础上对已有方法增强，通过创建Dao实现类的代理对象，实现了不写Dao实现类也可以实现功能。
+  
+  *******
+  
+  ### 五、mybatis框架主要是围绕着SqlSessionFactory 进行的的，创建过程如下：
+  
+  ① 定义一个Configruation对象，其中包含数据源、事务、mapper 文件资源以及影响数据库行为属性设置Seetings
+  
+  ②通过配置对象，则可以创建一个SqlSessionFactoryBulider对象  Bulider Build (in);
+  
+  ③通过SqlSession Factory Bulider 获得SqlSessionFactory的实例
+  
+  ④SqlSessionFactory 的实例可以获得操作数据的SqlSession实例，通过这个实例对数据库进行操作；
+  
+  ******
+  
+  ### 六、编写Dao 接口的实现类
+  
+  例子：
+  
+  `public class UserDaoImpl implement IUserDao {`
+  
+  `private SqlSessionFactory factory;`
+  
+  `public UserDaoimpl (SqlSessionFactory factory ){`
+  
+  `this.factory = factory;`
+  
+  `}`
+  
+  `public List<User> findAll(){`
+  
+  `//1.使用工厂创建SqlSession对象`
+  
+  `SqlSession session = factory.openSession();`
+  
+  `//2.使用session 执行所有的方法`
+  
+  `List<User> users = Session.selectList("com.itheima.mybatis.dao.IUserDao.findAll()");`
+  
+  `//3.释放资源`
+  
+  `session.close();`
+  
+  `//4.返回查询结果`
+  
+  `return users`
+  
+  `}`
+  
+  `}`
+  
+  **注：**
+  
+  ① selectList ()；括号里面参数指的dao接口的全限定类+方法名  "namespace + id"
+  
+  ② 记得要在实现类中关闭session
+  
+  ③**在不使用编写Dao 接口实现类的方法里，使用了代理模式。因此编写实现类，就不用使用代理模式Dao的代理模式。直接创建Daod的接口实现类对象，通过该对象调用执行方法；**
+  
+  `UserDaoImpl userDao = new userDao(factory)`；
+  
+  `userDao.finaAll()；`
 
+*****
 
+### 七、自定义mybatis流程的分析
 
+第一步：SqlSessionFactoryBuilder接受SqlMapConfig.xml 文件流，构建出SqlSessionFactory对象
 
+第二步：SqlSessionFactory 读取SqlMapConfig.xml中连接数据库和Mapper映射信息。用来生产出真正操作数据库的SqlSession对象
 
+第三步 ：SqlSession 对象的有两大作用：
 
+| 作用1            | 作用2                |
+| ---------------- | -------------------- |
+| 生成接口代理对象 | 定义通用增删改查方法 |
 
+注：无论哪个分支除了连接数据库信息，还需要得到 SQL语句
 
+第四步
 
+| 分支1：                                                      | 作分支2：                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 在SqlSessionImpl对象的getMapper方法中分两步来实现：          | 在SqlSessionImpl对象中提供selectList()方法，【当然实际mybatis框架中还有selectone,insert,方法】这些方法也分为两步： |
+| 第一：先用SqlSessionFactory读取的数据库连接信息创建Connection对象 | 第一：用SqlSessionFactory读取数据库连接信息创建出JDBC的connection对象 |
+| 第二：通过JDK代理模式创建出代理对象作为getMapper方法返回值。这里主要工作是创建对象时，第三个参数处理 类里面得到SQl语句，执行CRUD操作 | 第二：直接得到SQl语句，使用JDBC的Connection对象进行对象的CRUD操作 |
 
+第五步：封装结果集：无论使用使用分支1生成代理对象，还是直接使用分支二提供的CRUD方法，我们都要对返回的数据库结果进行封装。变成Java对象返回给调用者。所以我们还必须要知道调用者所需要的返回值类型
+
+总结：通过以上流程我们不难看出，无论是让mybatis帮我们创建代理对象还是直接使用mybatis提供的CRUD方法，其本质都是得到得到JDBC的Connetion对象，执行对应的sql语句，最终封装结果集。只是注解和XML配置文件两种开发模式在sql语句和返回值得方式上有所差异：
+
+如下图所示
+
+注解方式
+
+`@ Select("Select * from user")` 引号里是Sql语句
+
+`public List<User>findAll();` User是返回值类型 
 
 
 
