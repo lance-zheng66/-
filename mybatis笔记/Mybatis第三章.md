@@ -1,4 +1,4 @@
-## Mybatis 第六章节
+## Mybatis 第三章节
 
 #### 一、使用mybatis完成Dao层的开发
 
