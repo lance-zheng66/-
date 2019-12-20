@@ -285,15 +285,31 @@ in.close;
 
 `public List<User>findAll();` User是返回值类型 
 
+*****
 
+### 八、整理思路
 
+开发步骤：
 
+* 创建 PO (MODEL)类，和Dao接口 跟据需求创建
 
+* 创建主配置文件 SqlMapConfig.xml
 
+* 编写映射配置文件Dao..xml
 
+* 加载映射文件，在SqlMapConfig.zml中加载
 
+* 编写测试程序，即编写Java代码，连接并操作数据库
 
+  思路：
 
+* 读取配置文件
 
+* 通过SqlSessionFactoryBuilder 创建SqlSessionFactory会话工厂
 
+* 通过SqlSessionFactory创建SqlSession
+
+* 调用SqlSession的操作数据库方法
+
+* 关闭SqSession
 
