@@ -167,7 +167,7 @@ public User <u>findUserById</u>(int id)
 
 *****
 
-### mytbatis的映射文件
+### mybatis的映射文件
 
 一、输入映射 ParameterType
 

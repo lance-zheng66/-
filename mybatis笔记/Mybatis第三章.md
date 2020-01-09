@@ -56,6 +56,26 @@ eg:
 
 不再需要提交事务commit命令以及释放资源命令close。
 
+*****
+
+#### 使用代理DAO的方式来实现mybatis的CRUD操作与编写DAO的实现类的方式来实现mybatis的CRUD操作的区别于相似之处：
+
+首先看以下代码：
+
+①
+
+`@override(查询所有的方法)`
+
+`public List<User> findAll(){`
+
+`session.selectList(".........")`
+
+`}`
+
+②
+
+
+
 
 
 

@@ -37,7 +37,7 @@ insert方法，记得添加parametertype=" ......"即为保存参数的类型
 
 注:保存方法记得要提交事务
 
-② 配置拆入操作后，获取插入的数据的id
+② 配置插入操作后，获取插入的数据的id
 
 ```
 <insert id="saveUser" parameterType="com.itheima.domain.User">   

@@ -6,9 +6,11 @@ Spring 提供了多种技巧，借助他们可以实现更为高级的bean装配
 
 在开发软件的时候，有一个很大的挑战就是将应用程序从一个环境迁移到另外一个环境。在开发环境中，某些环境相关做法可能并不适合迁移到生产环境中，甚至即便迁移过去也无法正常工作。数据库配置、加密算法以及外部系统的集成是跨环境部署时会发生变化的几个典型例子。
 
+它可以理解为我们在Spring容器中所定义的Bean的逻辑组名称，只有当这些Profile被激活的时候，才会将Profile中所对应的Bean注册到Spring容器中。举个更具体的例子，我们以前所定义的Bean，当Spring容器一启动的时候，就会一股脑的全部加载这些信息完成对Bean的创建；而使用了Profile之后，它会将Bean的定义进行更细粒度的划分，将这些定义的Bean划分为几个不同的组，当Spring容器加载配置信息的时候，首先查找激活的Profile，然后只会去加载被激活的组中所定义的Bean信息，而不被激活的Profile中所定义的Bean定义信息是不会加载用于创建Bean的。
+
 **①比如数据库配置**，在开发环境中，我们可能会使用嵌入式数据库，并预先加载测试数据。
 
-在Spring配置类中，我们可能会在一个带@Bean注解的方法上使用EmbeddedDatabaseBulider:
+在Spring配置类中，我们可能会在一个带@Bean**注解的方法上使用EmbeddedDatabaseBulider**:
 
 `@Bean（destoryMethod="shutdown"）`
 
@@ -218,6 +220,8 @@ Spring 在确定哪个 profile 处于激活状态时，需要依赖两个独立�
 
  你尽可以选择spring.profiles.active和spring.profiles.default的 最佳组合方式以满足需求， 我所喜欢的一种方式是使用DispatcherServlet的参数将spring.profiles. default 设置为开发环境的 profile，我会在 Servlet 上下文中进行设置（为了兼顾到 ContextLoaderListener）。
 
+![](C:\Users\lance\Pictures\profile激活.PNG)
+
 按照这种方式设置spring.profiles.default，所有的开发人员都能从版本控 制软件中获得应用程序源码，并使用开发环境的设置（如嵌入式数据库）运行代码，而 不需要任何额外的配置。
 
 当应用程序部署到 QA、生产或其他环境之中时，负责部署的人根据情况使用系统。属性、环境变量或 JNDI 设置 spring.profiles.active 即可。当设置 spring.profiles.active以后，至于 spring.profiles.default设置成什么 值就已经无所谓了；系统会优先使用spring.profiles.active中所设置的 profile。
@@ -242,3 +246,178 @@ Spring 在确定哪个 profile 处于激活状态时，需要依赖两个独立�
 `}`
 
 在条件化创建 bean 方面，Spring 的 profile 机制是一种很棒的方法，这里的条件要 基于哪个 profile 处于激活状态来判断。Spring 4.0 中提供了一种更为通用的机制来实现 条件化的 bean 定义，在这种机制之中，条件完全由你来确定。让我们看一下如何使用 Spring 4 和@Conditional注解定义条件化的 bean
+
+*****
+
+### 3.2 条件化的bean
+
+希望一个或多个 bean 只有在应用的类路径下包含特定的库时才创建。或者 我们希望某个 bean 只有当另外某个特定的 bean 也声明了之后才会创建。我们还可能要 求只有某个特定的环境变量设置之后，才会创建某个 bean。**简而言之，就是在可以满足特定的条件下才可以创建的bean**
+
+ **Spring 4 引入了一个新的 @Conditional 注解，它可以用到带有@Bean 注解的方法上。如果给定的条件计算结 果为true，就会创建这个 bean，否则的话，这个 bean 会被忽略**
+
+假设有一个名为 MagicBean 的类，我们希望只有设置了 magic 环境属性 的时候，Spring 才会实例化这个类。如果环境中没有这个属性，那么MagicBean将会被忽略
+
+**条件化地创建bean**:
+
+`@Bean`
+
+`@Conditiona(MagicExistCondintion.class)`
+
+`public MagicBean magicBean(){`
+
+`return new MagicBean();`
+
+`}`
+
+由上述代码可见，，@Conditional中给定了一个 Class，它指明了条件——在本例中， 也就是MagicExistsCondition。@Conditional将 会通过Condition接 口进行 条件对比： 
+
+`public interface Condition{`
+
+`boolean matches(ConditionContext ctxt,`
+
+`AnnotatedTypeMetadata metadata);`
+
+`}`
+
+**设置给@Conditional的类可是任意实现了Condition接口的类型。**可以看出来。这个接口实现起来很简单很直接，只需要提供matches()方法的实现即可。如果matches()方法返回true,那么就会创建带有@Conditional注解的bean.如果matchers()返回false,将不会创建这些bean.
+
+在上述实例中，我们需要创建Condition的实现并根据环境中是否存在magic属性来做出决策，以下代码就是完成该功能的Condition 实现类
+
+`public class MagicExistCondition implement Condition {`
+
+`public boolean matches(ConditionContext context,AnntatedTypeMetadata metadata){`
+
+`Environment env = context.getEnvironment();`
+
+`return env.containsProperty("magic");//检查magic的属性`
+
+`}`
+
+`}`
+
+在以上的程序中，matches()方法很简单但很功能强大，它通过给定的ConditionContext对象进而得到 Environment对象，并使用这个对象检测环境中是否存在名为magic的环境属性。
+
+在本例中，属性的值是什么根本无所谓，只要属性存在即可满足要求。如果满足这个条件的话，matches()方法就会返回true.所带来的结果就是条件能够得到满足，所有@Conditional注解上引用MagicExistCondtion 的bean 都会被创建
+
+如果这个属性不存在，就无法满足条件，matches（）方法就会返回 false，这协bean都不会被创建。
+
+实际上，MagicExistsCondition中只是使用了ConditionContext得到的Environment,但 Condition实现考量的因素比这个更多。
+
+matches () 方法会得到 ConditionContext 和 AnntatedTypeMetadata对象来做决策
+
+**ConditionContext**是一个接口，大致如下所示：
+
+`public interface ConditionContext{`
+
+`BeanDefinitionResitry getRegistry();`
+
+`ConfigurableListableBeanFactory getBeanFactory();`
+
+`Environment getEnvirment();`
+
+`ResourceLoader getResuorceLoader();`
+
+`ClassLoader getClassLoader();`
+
+`}`
+
+
+
+**借助ConditionContext里的方法，我们可以做到以下：**
+
+* 借助 getRegistry() 返回的 BeanDefinitionRegistry 检查 bean定义；
+* 借助 getBeanFactory()  返回的 ConfigurableListableBeanFactory 检查bean是否存在，甚至探查 bean的属性
+* 借助 getEnviroment () 返回的 Environment 检查环境变量是否存在以及他的值是什么；
+* 读取并探查 getResourcesLoader() 返回的ResourceLoader 所加载的资源
+* 借助 getClassLoader() 返回的ClassLoder 加载并检查类是否存在
+
+**AnnotatedTypeMetadata接口，则能够让我们检查带有@Bean注解的方法上还有什么其他的注解。**
+
+所示如下：
+
+`public interface AnnotatedTypeMetadata{`
+`boolean isAnnotated(String annotationType);`
+
+`Map<String,Object> getAnnotationAttributes(String annotationType);`
+
+`Map<String,Object>  getAnnotationAttributes(String  annotationType,`
+
+`boolean classValuesAsString);`
+
+`MultiValueMap<String,object> getAllAnnotationAttributes(String annotationType);`
+
+`MultiValuesMap<String,object> getAllAnnotationAttributes(String annotationType,`
+
+`boolean classValuesAsString);`
+
+`}`
+
+借助 isAnnotated()方法，我们能判断带有@Bean注解的方法是不是还有其他特定的注解。
+
+而借助其他的方法，我们能够检查@Bean注解的方法上，其他注解的属性
+
+*****
+
+**从Spring 4 开始@Profile注解进行了重构，使其基于@Conditional和 Condition实现**
+
+@Profile 注解如下所示：
+
+`@Retention(RetentionPolicy.RUNTIME)`
+
+`@Target({ElementType.TYPE,ElementType.METHOD})`
+
+`@Documented`
+
+`@Conditional(ProfileCondition.class)`
+
+`public @interface Profile{`
+
+`String [] values();`
+
+`}`
+
+注意：@Profile 本身也使用了@Conditional注解，并且引用ProfileCondition 作为Condition实现。如下，
+
+**ProfileCondition 实现了 Condition 接口，并且在做出决策的过程中，考 虑到了 ConditionContext 和AnnotatedTypeMetadata 中的多个因素。 **
+
+ProfileCondition j检查 某个bean profile 是否可用
+
+`class ProfileCondition implements Condtion{`
+
+`public boolean matches(ConditionConText context, AnnotatedTypeMetadata metadata) {`
+
+`if(context.getEnvironment ()!=null){`
+
+`MultiValueMap<String,Object> attrs `
+
+`= metadata,getAllAnnotationAttributes(Profile.class.getName());`
+
+`if(attrs!=nulls){for(Object values: attrs.get("value")){`
+
+`if(context.getEnvirment().accpetsProfiles(((String[]) value))){ return true;`
+`}`
+
+`}`
+
+`return false`
+
+`}`
+
+`}`
+
+`return ture;`
+
+`}`
+
+`}`
+
+
+
+ProfileCondition通过AnnotatedTypeMetadata得到了用 于@Profile 注解的所有属性。
+
+借助该信息，它会明确地检查 value 属性，该属性包 含了bean的profile名称。
+
+然后，它根据通过ConditionContext得到的Environment 来检查
+
+［借助acceptsProfiles()方法］该 profile 是否处于激活状态
+
